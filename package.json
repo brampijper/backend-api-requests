@@ -17,6 +17,7 @@
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.9",
+    "rss-parser": "^3.13.0"
   }
 }
