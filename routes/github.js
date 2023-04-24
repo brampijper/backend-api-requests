@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { Octokit } = require("@octokit/rest");
-// const cors = require('../utils/cors');
 const fetch = require('node-fetch');
 
 // middleware that is specific to this router
@@ -11,7 +10,7 @@ router.use((req, res, next) => {
 })
 
 // define github/repos route
-router.get('/repos', cors, (req, res) => {
+router.get('/repos', (req, res) => {
   const username = req.query.username
 
   const octokit = new Octokit({
@@ -29,7 +28,7 @@ router.get('/repos', cors, (req, res) => {
 })
 
 // define user stats route for github
-router.get('/stats', cors, (req, res) => {
+router.get('/stats', (req, res) => {
   const username = req.query.username
     
   const headers = {
