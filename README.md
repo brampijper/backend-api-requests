@@ -1,56 +1,60 @@
+# Backend API Requests
+
+This project is an example of how to make requests to a backend server from a client-side application. It uses the Fetch API to make HTTP requests, and demonstrates how to cache data in the browser for faster subsequent requests.
+
 ## Getting Started
 
-We provide a sample app using Node.js that you can deploy on App Platform. These steps will get this sample application running for you using App Platform.
+To get started, clone this repository and navigate to the root directory in your terminal.
 
-**Note: Following these steps may result in charges for the use of DigitalOcean services.**
+```bash
+git clone https://github.com/brampijper/backend-api-requests.git
+cd backend-api-requests
+```
 
-### Requirements
+### Prerequisites
 
-* You need a DigitalOcean account. If you don't already have one, you can sign up at https://cloud.digitalocean.com/registrations/new.
+Before running this project, you will need to have [Node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/) installed on your machine.
 
-## Deploying the App
+### Installing
 
-Click this button to deploy the app to the DigitalOcean App Platform. If you are not logged in, you will be prompted to log in with your DigitalOcean account.
+To install the dependencies, run the following command:
 
-[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/digitalocean/sample-nodejs/tree/main)
+```bash
+npm install
+```
 
-Using this button disables the ability to automatically re-deploy your app when pushing to a branch or tag in your repository as you are using this repo directly.
+### Usage
 
-If you want to automatically re-deploy your app, [fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo) the GitHub repository to your account so that you have a copy of it stored to the cloud. Click the **Fork** button in the GitHub repository and follow the on-screen instructions.
+To start the server, run the following command:
 
-After forking the repo, you should now be viewing this README in your own GitHub org (e.g. `https://github.com/<your-org>/sample-nodejs`). To deploy the new repo, visit https://cloud.digitalocean.com/apps and click **Create App**. Then, click **GitHub**, select the repository you created and select the `main` branch. App Platform will inspect the code, automatically detect the kind of component to create, and use the correct buildpack to create and deploy a container.
+```bash
+npm run start
+```
 
-After clicking the **Deploy to DigitalOcean** button or completing the instructions above to fork the repo, follow these steps:
+or if you want to use nodemon ( for live updates when a file changes on the server)
 
-1. Configure the app such as specifying HTTP routes, environment variables or adding a database.
-1. Provide a name for your app and select which region you want to deploy your app to and click **Next**. The closest region to you should be selected by default. All App Platform apps are routed through a global CDN. So this will not affect your app performance, unless it needs to talk to external services.
-1. On the following screen, leave all the fields as they are and click **Next**.
-1. Confirm your **Plan** settings and how many containers you want to launch and click **Launch Basic/Pro App**.
-1. You should see a "Building..." progress indicator. You can click **View Logs** to see more details of the build.
-1. It can take a few minutes for the build to finish, but you can follow the progress in the **Deployments** tab.
-1. Once the build completes successfully, click the **Live App** link in the header and you should see your running application in a new tab, displaying the home page.
+```bash
+npm run dev
+```
 
-### Making Changes to Your App
+This will start the server at `http://localhost:3000`.
 
-If you followed the steps to fork the repo and used your own copy when deploying the app, you can push changes to your fork and see App Platform automatically re-deploy the update to your app. During these automatic deployments, your application will never pause or stop serving request because App Platform offers zero-downtime deployments.
+To make requests to the server from a client-side application, import the `fetchAndCacheData` function from `src/fetch.js`.
 
-Here's an example code change you can make for this app:
+```javascript
+import fetchAndCacheData from './fetch.js';
 
-1. Edit code within the repository
-1. Commit the change to the `main` branch. Normally it's a better practice to create a new branch for your change and then merge that branch to `main` after review, but for this demo you can commit to the `main` branch directly.
-1. Visit https://cloud.digitalocean.com/apps and navigate to your sample app.
-1. You should see a "Building..." progress indicator, just like when you first created the app.
-1. Once the build completes successfully, click the **Live App** link in the header and you should see your updated application running. You may need to force refresh the page in your browser (e.g. using **Shift+Reload**).
+fetchAndCacheData('/api/data')
+  .then(data => console.log(data))
+  .catch(error => console.log(error));
+```
 
-### Learn More
+This will make a GET request to `http://localhost:3000/api/data` and log the response data to the console. The `fetchAndCacheData` function will also cache the response data in the browser for faster subsequent requests.
 
-You can learn more about the App Platform and how to manage and update your application at https://www.digitalocean.com/docs/app-platform/.
+### Contributing
 
-## Deleting the App
+Contributions are welcome! If you find a bug or would like to suggest a new feature, please open an issue or submit a pull request.
 
-When you no longer need this sample application running live, you can delete it by following these steps:
-1. Visit the Apps control panel at https://cloud.digitalocean.com/apps.
-2. Navigate to the sample app.
-3. In the **Settings** tab, click **Destroy**.
+### License
 
-**Note: If you do not delete your app, charges for using DigitalOcean services will continue to accrue.**
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
