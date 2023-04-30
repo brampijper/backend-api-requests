@@ -1,4 +1,5 @@
 const express = require('express')
+const path = require('path');
 require('dotenv').config()
 
 const cors = require('cors');
@@ -11,6 +12,8 @@ const blog = require('./routes/blog');
 
 // Check "/bin/www.js" for port & settings.
 const app = express() 
+
+app.use(express.static(path.join(__dirname, 'files/screenshots'))); // serving static file using  middleware, with the root directory set to ./files.
 
 // Enable cors with the options object.
 app.use(cors(corsOptions))
