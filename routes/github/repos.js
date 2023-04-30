@@ -4,6 +4,8 @@ const router = express.Router();
 const { Octokit } = require("@octokit/rest");
 const { isCachedDataValid, storeData } = require('../../utils/isCachedDataValid');
 const generateETag = require('../../utils/generateETag');
+const takeScreenshot = require('../../utils/screenshot');
+
 
 // middleware that is specific to this router
 router.use((req, res, next) => {
@@ -44,24 +46,29 @@ router.get('/repos', async (req, res) => {
     // Fetch the data using octokit
     const response = octokit.rest.repos.listForUser({username})
   
-    response.then( ({data}) => {
-      const repositories = data
-        .filter( repo => repo.homepage) // only repo's with a homepage
-        .map( ({id, homepage, name, created_at, description, topics}) => { //destructring the properties I need
-          return { 
-            id, 
-            homepage, 
-            name, 
-            created_at, 
-            description, 
-            topics 
-          }
-        })
+    response.then( async ({data}) => {
+      const promises = data // filter out repos without a homepage and map the properties needed
+        
+      .filter( repo => repo.homepage) // only repo's with a homepage  
+      .map( async ({id, homepage, name, created_at, description, topics}) => { //destructring the properties I need
+    
+        const image_url = await takeScreenshot(homepage, './files/screenshots'); // Using puppeteer to take screenshot of the website. 
+          
+        return { 
+          id,
+          homepage, 
+          name, 
+          created_at, 
+          description, 
+          topics,
+          image_url
+        }
+       })
 
-      const etag = generateETag(data)
+      const repositories = await Promise.all(promises); // Wait for all promises to resolve before continuing
+      const etag = generateETag(data) // Generate ETag for the data
 
-      //store the url, repositories, etag to a json file
-      storeData('/repos', repositories, etag)
+      storeData('/repos', repositories, etag) //store the url, repositories, etag to a json file
 
       res.setHeader('Cache-Control', 'public, max-age=604800')
       res.setHeader('ETag', etag);
