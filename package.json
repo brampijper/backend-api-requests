@@ -17,6 +17,7 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "node-fetch": "^2.6.9",
+    "puppeteer": "^19.11.1",
     "rss-parser": "^3.13.0"
   }
 }
