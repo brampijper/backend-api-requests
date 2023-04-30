@@ -1,7 +1,5 @@
-const cors = require('cors')
-
 const whitelist = process.env.WHITELISTED.split(", ");
-console.log(whitelist)
+// console.log(whitelist)
 const corsOptions = {
   origin: function (origin, callback) {
     console.log(whitelist)
@@ -13,4 +11,4 @@ const corsOptions = {
   }
 }
 
-module.exports = cors(corsOptions);
+module.exports = { corsOptions }
