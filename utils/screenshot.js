@@ -16,7 +16,6 @@ async function takeScreenshot(url, dir) {
         }
       
         const browser = await puppeteer.launch({
-            headless: "new",
             executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
             args: ['--no-sandbox'], // required
         });

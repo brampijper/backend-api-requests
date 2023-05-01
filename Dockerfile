@@ -1,8 +1,8 @@
-# Use Node.js version 14 as the base image
+# Use Node.js version 17 as the base image
 FROM node:17-alpine
 
 # Set the working directory to the root directory of the repository
-WORKDIR /
+WORKDIR /backend-api-requests
 
 # Copy the package.json and package-lock.json files to the container
 COPY package*.json ./
