@@ -9,16 +9,23 @@ async function takeScreenshot(url, dir) {
             .replace(/[^a-zA-Z0-9]/g, '-') // replace non-alphanumeric characters with hyphen "-"
             + '.jpg'; // add jpg extension.
         const screenshotPath = path.join(dir, screenshotName);
-        
+        console.log('screenshot path: ', screenshotPath)
         if (fs.existsSync(screenshotPath)) {
             console.log(`Screenshot for ${url} already exists, skipping...`);
             return screenshotName;
         }
+
+        let browser;
+        try {
+            browser = await puppeteer.launch({
+                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+                args: ['--no-sandbox'], // required
+            });
+        } catch (err) {
+            console.log(`Error launching puppeteer for ${url}:`, err);
+            throw err;
+        }
       
-        const browser = await puppeteer.launch({
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-            args: ['--no-sandbox'], // required
-        });
         const page = await browser.newPage();
         await page.goto(url);
     
@@ -41,7 +48,7 @@ async function takeScreenshot(url, dir) {
         return screenshotName;
     } catch (err) {
         
-        console.error(`Error occurred while taking screenshot of ${url}`, err); // Handle any errors that may occur during the function execution
+        console.log(`Error occurred while taking screenshot of ${url}`, err); // Handle any errors that may occur during the function execution
         throw err; // rethrow the error to be handled by the caller of this function
     }
 }
