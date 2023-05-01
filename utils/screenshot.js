@@ -16,6 +16,7 @@ async function takeScreenshot(url, dir) {
         }
 
         let browser;
+        console.log(process.env.PUPPETEER_EXECUTABLE_PATH)
         try {
             browser = await puppeteer.launch({
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
