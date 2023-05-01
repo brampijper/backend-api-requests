@@ -15,7 +15,11 @@ async function takeScreenshot(url, dir) {
             return screenshotName;
         }
       
-        const browser = await puppeteer.launch({headless: "new"});
+        const browser = await puppeteer.launch({
+            headless: "new",
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+            args: ['--no-sandbox'], // required
+        });
         const page = await browser.newPage();
         await page.goto(url);
     
