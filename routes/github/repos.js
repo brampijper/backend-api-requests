@@ -75,7 +75,6 @@ router.get('/repos', async (req, res) => {
       res.send(repositories)
       return;
     })
-    .catch(error => res.status(500).send('Failed to fetch data from server ', error))
   }
 })
 
