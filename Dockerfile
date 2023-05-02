@@ -13,15 +13,6 @@ RUN npm install
 # Copy the rest of the application files to the container
 COPY . .
 
-# --- START ---
-RUN apk add --no-cache chromium ca-certificates
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
-ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
-# --- END ---
-
-# Check for missing libraries and install them if any
-RUN apk add --no-cache $(ldd $(which chromium-browser) | awk '{if(/missing/){print $1}}') || true
-
 # Expose the port that the application will listen on
 EXPOSE 8080
 
