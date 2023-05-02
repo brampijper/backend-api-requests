@@ -5,13 +5,9 @@ const path = require('path');
 
 async function takeScreenshot(url, dir) {
 
-  const options = new firefox.Options()
-  .setBinary('/usr/bin/firefox-esr')
-  .headless();
-
   const driver = await new webdriver.Builder()
   .forBrowser('firefox')
-  .setFirefoxOptions(options)
+  .setFirefoxOptions(new firefox.Options().setBinary(process.env.FIREFOX_BIN).addArguments(process.env.FIREFOX_OPTIONS))
   .build();
 
   try {
