@@ -7,7 +7,7 @@ async function takeScreenshot(url, dir) {
     const screenshotPath = path.join(dir, screenshotName);
     
     if (fs.existsSync(screenshotPath)) {
-        // console.log(`Screenshot for ${url} already exists, skipping...`);
+        console.log(`Screenshot for ${url} already exists, skipping...`);
         return screenshotName;
     }
   
@@ -30,7 +30,7 @@ async function takeScreenshot(url, dir) {
     
     await browser.close();
   
-    // console.log(`Screenshot for ${url} created at ${screenshotPath}`);
+    console.log(`Screenshot for ${url} created at ${screenshotPath}`);
     return screenshotName;
 }
 
