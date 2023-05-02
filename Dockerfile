@@ -1,5 +1,5 @@
 # Use Node.js version 17 as the base image
-FROM node:17
+FROM node:17-slim
 
 # Set the working directory to the root directory of the repository
 WORKDIR /backend-api-requests
