@@ -2,7 +2,13 @@
 FROM node:16-alpine
 
 # Install Firefox
-RUN apk add --no-cache firefox-esr
+RUN apk add --no-cache firefox-esr xvfb
+
+# Set the Firefox binary path
+ENV FIREFOX_BIN=/usr/bin/firefox-esr
+
+# Set the Firefox headless mode option
+ENV FIREFOX_OPTIONS="--headless"
 
 # Set the working directory to the root directory of the repository
 WORKDIR /backend-api-requests
@@ -19,5 +25,5 @@ COPY . .
 # Expose the port that the application will listen on
 EXPOSE 8080
 
-# Start the application
-CMD [ "npm", "start" ]
+# Start xvfb and the application
+CMD ["sh", "-c", "Xvfb :99 -screen 0 1024x768x24 -ac +extension GLX +render -noreset & npm start"]
