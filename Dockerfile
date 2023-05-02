@@ -1,6 +1,9 @@
 # Use Node.js version 16 as the base image
 FROM node:16-alpine
 
+# Install Firefox
+RUN apk add --no-cache firefox-esr
+
 # Set the working directory to the root directory of the repository
 WORKDIR /backend-api-requests
 
