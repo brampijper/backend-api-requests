@@ -2,13 +2,15 @@
 FROM node:16-alpine
 
 # Install Firefox
-RUN apk add --no-cache firefox-esr xvfb libpci
+RUN apk add --no-cache firefox-esr xvfb pciutils
 
 # Set the Firefox binary path
 ENV FIREFOX_BIN=/usr/bin/firefox-esr
 
 # Set the Firefox headless mode option
 ENV FIREFOX_OPTIONS="--headless"
+
+ENV LD_LIBRARY_PATH=/usr/lib
 
 # Set the working directory to the root directory of the repository
 WORKDIR /backend-api-requests
