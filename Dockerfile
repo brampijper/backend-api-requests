@@ -2,7 +2,7 @@
 FROM node:16-alpine
 
 # Install Firefox
-RUN apk add --no-cache firefox-esr xvfb
+RUN apk add --no-cache firefox-esr xvfb libpci
 
 # Set the Firefox binary path
 ENV FIREFOX_BIN=/usr/bin/firefox-esr
