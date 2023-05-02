@@ -15,19 +15,19 @@ router.use((req, res, next) => {
 
 router.get('/repos', async (req, res) => {
   try {
-  const etag = req.headers['if-none-match']; // Check if the ETag is present in the request headers
+  // const etag = req.headers['if-none-match']; // Check if the ETag is present in the request headers
 
-  const { isValid, cachedData } = isCachedDataValid('/repos', etag) // Check if cached data is valid using ETag
+  // const { isValid, cachedData } = isCachedDataValid('/repos', etag) // Check if cached data is valid using ETag
 
-  if (isValid) { // If cached data is valid, send 304 status and end response
-    res.status(304).end();
-    return;
-  }
+  // if (isValid) { // If cached data is valid, send 304 status and end response
+  //   res.status(304).end();
+  //   return;
+  // }
 
-  if (cachedData) { // If there is cached data, send it and end response
-    res.send(cachedData)
-    return;
-  } 
+  // if (cachedData) { // If there is cached data, send it and end response
+  //   res.send(cachedData)
+  //   return;
+  // } 
    // Data is not cached, fetch fresh data.
     const username = req.query.username
 
@@ -62,7 +62,7 @@ router.get('/repos', async (req, res) => {
       
     const newEtag = generateETag(data) // Generate ETag for the data
 
-    storeData('/repos', repositories, etag) //store the url, repositories, etag to a json file
+    // storeData('/repos', repositories, etag) //store the url, repositories, etag to a json file
 
     res.setHeader('Cache-Control', 'public, max-age=604800')
     res.setHeader('ETag', newEtag);
