@@ -16,8 +16,8 @@ COPY . .
 # Add Chromium repository since the package is not available.
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
-    add-apt-repository "deb http://ppa.launchpad.net/canonical-chromium-builds/stage/ubuntu bionic main" -y && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4E1B983C5B393194 && \
+    && add-apt-repository "deb http://ppa.launchpad.net/canonical-chromium-builds/stage/ubuntu bionic main" -y \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4E1B983C5B393194 && \
 
 # Install dependencies and Chromium browser # --- Installing puppeteer ---
 RUN apt-get upgrade && \
