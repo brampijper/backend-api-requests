@@ -4,10 +4,15 @@ const fs = require('fs');
 const path = require('path');
 
 async function takeScreenshot(url, dir) {
+
+  const options = new firefox.Options()
+  .setBinary('/usr/bin/firefox')
+  .headless();
+
   const driver = await new webdriver.Builder()
-    .forBrowser('firefox')
-    .setFirefoxOptions(new firefox.Options().headless())
-    .build();
+  .forBrowser('firefox')
+  .setFirefoxOptions(options)
+  .build();
 
   try {
     const screenshotName = url
