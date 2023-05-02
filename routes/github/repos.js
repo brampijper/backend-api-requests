@@ -14,21 +14,26 @@ router.use((req, res, next) => {
 })
 
 router.get('/repos', async (req, res) => {
-  try {
-  // const etag = req.headers['if-none-match']; // Check if the ETag is present in the request headers
 
-  // const { isValid, cachedData } = isCachedDataValid('/repos', etag) // Check if cached data is valid using ETag
+  // Check if the ETag is present in the request headers
+  const etag = req.headers['if-none-match'];
 
-  // if (isValid) { // If cached data is valid, send 304 status and end response
-  //   res.status(304).end();
-  //   return;
-  // }
+  const { isValid, cachedData } = isCachedDataValid('/repos', etag)
 
-  // if (cachedData) { // If there is cached data, send it and end response
-  //   res.send(cachedData)
-  //   return;
-  // } 
-   // Data is not cached, fetch fresh data.
+  if (isValid) { 
+    // console.log('repos: isvalid: ', isValid)
+    res.status(304).end();
+    return;
+  }
+
+  if (cachedData) {
+    // console.log('repos: using cahedData: ')
+    res.send(cachedData)
+    return;
+  } 
+  
+  else { // Data is not cached, fetch fresh data.
+    // console.log('repos: making a normal request')
     const username = req.query.username
 
     //Create a new Octokit instance
@@ -39,38 +44,38 @@ router.get('/repos', async (req, res) => {
     });
     
     // Fetch the data using octokit
-    const { data } = await octokit.rest.repos.listForUser({username})
+    const response = octokit.rest.repos.listForUser({username})
+  
+    response.then( async ({data}) => {
+      const promises = data // filter out repos without a homepage and map the properties needed
+        
+      .filter( repo => repo.homepage) // only repo's with a homepage  
+      .map( async ({id, homepage, name, created_at, description, topics}) => { //destructring the properties I need
+    
+        const image_url = await takeScreenshot(homepage, './files/screenshots'); // Using puppeteer to take screenshot of the website. 
+          
+        return { 
+          id,
+          homepage, 
+          name, 
+          created_at, 
+          description, 
+          topics,
+          image_url
+        }
+       })
 
-    const repositories = await Promise.all( // Await when all promises are fulfilled (taking screenshots takes a while)
-      data
-        .filter( (repo) => repo.homepage) // Filter the repo's with a homepage url
-        .map( async ({id, homepage, name, created_at, description, topics}) => { //destructring the properties I need
-      
-          const image_url = await takeScreenshot(homepage, './files/screenshots'); // Using puppeteer to take a screenshot of the website. 
-            
-          return { 
-            id,
-            homepage, 
-            name, 
-            created_at, 
-            description, 
-            topics,
-            image_url
-          }
-         })
-    );
-      
-    const newEtag = generateETag(data) // Generate ETag for the data
+      const repositories = await Promise.all(promises); // Wait for all promises to resolve before continuing
+      const etag = generateETag(data) // Generate ETag for the data
 
-    // storeData('/repos', repositories, etag) //store the url, repositories, etag to a json file
+      storeData('/repos', repositories, etag) //store the url, repositories, etag to a json file
 
-    res.setHeader('Cache-Control', 'public, max-age=604800')
-    res.setHeader('ETag', newEtag);
-    res.send(repositories)
-
-  } catch (error) {
-    console.error('Failed to fetch data from server', error);
-    res.status(500).send('Failed to fetch data from server');
+      res.setHeader('Cache-Control', 'public, max-age=604800')
+      res.setHeader('ETag', etag);
+      res.send(repositories)
+      return;
+    })
+    .catch(error => res.status(500).send('Failed to fetch data from server ', error))
   }
 })
 
