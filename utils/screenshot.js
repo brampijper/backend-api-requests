@@ -1,8 +1,12 @@
 const fs = require('fs');
 const path = require('path');
+const puppeteer = require('puppeteer');
 
 async function takeScreenshot(url, dir) {
-    const screenshotName = `${url.replace(/[^a-zA-Z0-9]/g, '-')}.jpg`;
+  const screenshotName = url
+    .replace(/^https?:\/\//i, '') // remove "http://" or "https://"
+    .replace(/[^a-zA-Z0-9]/g, '-') // replace non-alphanumeric characters with hyphen "-"
+    + '.jpg'; // add jpg extension.
     const screenshotPath = path.join(dir, screenshotName);
     
     if (fs.existsSync(screenshotPath)) {
