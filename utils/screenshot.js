@@ -17,15 +17,14 @@ async function takeScreenshot(url, dir) {
 
         let browser;
         console.log(process.env.PUPPETEER_EXECUTABLE_PATH)
-        try {
-            browser = await puppeteer.launch({
-                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-                args: ['--no-sandbox'], // required
-            });
-        } catch (err) {
-            console.log(`Error launching puppeteer for ${url}:`, err);
-            throw err;
-        }
+        browser = await puppeteer.launch({
+            // executablePath: "C:\Program Files\Google\Chrome\Application\chrome.exe",
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+            args: ['--no-sandbox', '--headless', '--disable-setuid-sandbox'], // required
+        });
+
+        console.log(browser)
+
       
         const page = await browser.newPage();
         await page.goto(url);
