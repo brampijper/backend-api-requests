@@ -18,9 +18,10 @@ async function takeScreenshot(url, dir) {
         let browser;
         console.log(process.env.PUPPETEER_EXECUTABLE_PATH)
         browser = await puppeteer.launch({
+            headless: true,
             // executablePath: "C:\Program Files\Google\Chrome\Application\chrome.exe",
             executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-            args: ['--no-sandbox'], // required
+            args: ['--no-sandbox', '--disable-setuid-sandbox'], // required
         });
       
         const page = await browser.newPage();
