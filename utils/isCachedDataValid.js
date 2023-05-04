@@ -2,16 +2,30 @@ const { readDataFile, writeDataFile } = require('./dataFile');
 
 let cacheData = readDataFile();
 
-// If the ETag is present in both the request headers and the cache,
-// and they match, return a 304 Not Modified response
 function isCachedDataValid(url, etag) {
     const data = cacheData[url];
 
-    if (data && etag === data.cachedEtag && Date.now() < data.expiration) {
-        return { isValid: true, cachedData: data}
+    if (data) { // data exists
+        const isEtagIdentical = etag === data.cachedEtag; // Etag in request headers and the cached Etag on the server match
+        const isNotExpired = Date.now() < data.expiration; // Cached data on the server is not expired.
+
+        if (isEtagIdentical && isNotExpired) {
+            return true;
+        }
+
+        return false // Data is stale or etag did not match, fetch new data. 
     } else {
-        return { isValid: false, cacheData: null}
+        return false; // data did not exists on the server. // fetch fresh data.
     }
+}
+
+function getCachedData(url) {
+    const data = cacheData[url];
+    if (!data) {
+        console.log('no cached data on the server')
+    }
+    return data; //return cachedData.
+
 }
 
 function storeData(url, data, etag) {
@@ -19,7 +33,7 @@ function storeData(url, data, etag) {
     cacheData[url] = {
         cachedData: data, 
         cachedEtag: etag,
-        expiration: Date.now() + 7 * 24 * 60 * 60 * 1000, //1 week. 
+        expiration: Date.now() + 7 * 24 * 60 * 60 * 1000, //1 week. //set this to 1 minute to test.
     }
 
     writeDataFile(cacheData);
@@ -27,5 +41,6 @@ function storeData(url, data, etag) {
 
 module.exports = {
     isCachedDataValid,
+    getCachedData,
     storeData
 }

@@ -3,8 +3,12 @@ const router = express.Router();
 let Parser = require('rss-parser');
 let parser = new Parser();
 
-const { isCachedDataValid, storeData } = require('../utils/isCachedDataValid');
 const generateETag = require('../utils/generateETag');
+const { 
+    isCachedDataValid, 
+    storeData, 
+    getCachedData 
+  } = require('../utils/isCachedDataValid');
 
 // middleware that is specific to this router
 router.use((req, res, next) => {
@@ -18,23 +22,32 @@ router.get('/posts', (req, res) => {
     const etag = req.headers['if-none-match'];
     // console.log(etag)
 
-    const { isValid, cachedData } = isCachedDataValid('/posts', etag)
-
-    if (isValid) {
-        // console.log('blog: isvalid: ', isValid)
-        res.status(304).end();
-        return;
-    }
-
-    if (cachedData) {
-        // console.log('blog: using cahedData: ')
-        res.send(cachedData)
-        return;
-    } 
+    if (etag) { //etag exists. Let's compare it with the cached server data.
+        const isValid = isCachedDataValid('/posts', etag)
+    
+        if (isValid) { // Use the cached data on the client side.
+          console.log('posts: isvalid: ', isValid)
+          res.status(304).end();
+          return;
+        }
+      }
 
     else {
+        const cachedDataOnServer = getCachedData('/posts'); // check for the cached data on the server with the correct path.
+    
+        // ok. no cached no data on the client side ? Here. have the cached data from the server.
+        if (cachedDataOnServer) {
+          console.log( 'cached data on server', cachedDataOnServer);  
+          const { cachedData, cachedEtag } = cachedDataOnServer;
+          
+          res.setHeader('Cache-Control', 'public, max-age=604800')
+          res.setHeader('ETag', cachedEtag);
+          res.send(cachedData)
+          return;
+        } 
+
         (async () => {
-            // console.log('blog: making a normal request')
+            console.log('blog: making a normal request')
             let feed = await parser.parseURL('https://focused-galileo-c3ee18.netlify.app/rss.xml');
             
             if (feed.items) {

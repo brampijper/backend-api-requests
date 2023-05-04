@@ -2,13 +2,17 @@ const express = require('express');
 const router = express.Router();
 
 const { Octokit } = require("@octokit/rest");
-const { isCachedDataValid, storeData } = require('../../utils/isCachedDataValid');
 const generateETag = require('../../utils/generateETag');
 const takeScreenshot = require('../../utils/screenshot');
+const { 
+  isCachedDataValid, 
+  storeData, 
+  getCachedData 
+} = require('../../utils/isCachedDataValid');
 
 
 // middleware that is specific to this router
-router.use((req, res, next) => {
+router.use('/repos', (req, res, next) => {
     console.log('repo time: ', Date.now())
     next()
 })
@@ -17,24 +21,47 @@ router.get('/repos', async (req, res) => {
 
   // Check if the ETag is present in the request headers
   const etag = req.headers['if-none-match'];
+  // console.log('stats: ', etag)
 
-  const { isValid, cachedData } = isCachedDataValid('/repos', etag)
+  if (etag) { //etag exists. Let's compare it with the cached server data.
+    const isValid = isCachedDataValid('/repos', etag)
 
-  if (isValid) { 
-    // console.log('repos: isvalid: ', isValid)
-    res.status(304).end();
-    return;
+    if (isValid) { // Use the cached data on the client side.
+      console.log('repos: isvalid: ', isValid)
+      res.status(304).end();
+      return;
+    }
   }
 
-  if (cachedData) {
-    // console.log('repos: using cahedData: ')
-    res.send(cachedData)
-    return;
-  } 
-  
   else { // Data is not cached, fetch fresh data.
-    // console.log('repos: making a normal request')
-    const username = req.query.username
+    const cachedDataOnServer = getCachedData('/repos'); // check for the cached data on the server with the correct path.
+    
+    // ok. no cached no data on the client side ? Here. have the cached data from the server.
+    if (cachedDataOnServer) {
+      console.log( 'cached data on server', cachedDataOnServer);  
+      const { cachedData, cachedEtag } = cachedDataOnServer;
+
+      const promises = cachedData
+        .map( async (repo) => {
+          const screenshotName = await takeScreenshot(repo.homepage, './files/screenshots'); // Check if images exist -> are there? all good.
+
+          if (screenshotName !== repo.image_url) { // if not replace with updated image_url.
+            console.log(screenshotName); 
+            repo.image_url = screenshotName;
+          } 
+          return repo;
+        })
+
+      const repositories = await Promise.all(promises); // Wait for all promises to resolve before continuing
+
+      res.setHeader('Cache-Control', 'public, max-age=604800')
+      res.setHeader('ETag', cachedEtag);
+      res.send(repositories)
+      return;
+    } 
+
+    console.log('repos: making a normal request')
+    const username = req.query.username || "brampijper"
 
     //Create a new Octokit instance
     const octokit = new Octokit({
