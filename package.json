@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node --experimental-modules ./bin/www",
+    "start": "node ./bin/www",
     "dev": "nodemon ./bin/www"
   },
   "engines": {
-    "node": "17.x"
+    "node": "18.x"
   },
   "dependencies": {
     "@octokit/rest": "^19.0.7",
