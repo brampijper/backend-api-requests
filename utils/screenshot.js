@@ -23,7 +23,7 @@ async function takeScreenshot(url, dir) {
     await page.goto(url);
 
     await page.setViewport({
-        width: 0,
+        width: 1200,
         height: 800,
         deviceScaleFactor: 1,
       });
