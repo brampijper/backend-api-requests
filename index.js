@@ -18,6 +18,9 @@ app.use(express.static(path.join(__dirname, 'files/screenshots'))); // serving s
 // Enable cors with the options object.
 app.use(cors(corsOptions))
 
+// disable the default etag middleware
+app.set('etag', false);
+
 app.get('/', (req,res) => {
   res.json('this is the home of the server')
 })
