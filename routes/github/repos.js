@@ -8,59 +8,61 @@ const {
   isCachedDataValid, 
   storeData, 
   getCachedData 
-} = require('../../utils/isCachedDataValid');
-
+} = require('../../utils/cacheUtils');
 
 // middleware that is specific to this router
 router.use('/repos', (req, res, next) => {
-    console.log('repo time: ', Date.now())
+    // console.log('repo time: ', Date.now())
     next()
 })
 
 router.get('/repos', async (req, res) => {
+  const expirationInMinutes = 1 // set custom expire time for this route.
+  const maxAgeInSeconds = expirationInMinutes * 60;
 
   // Check if the ETag is present in the request headers
-  const etag = req.headers['if-none-match'];
-  // console.log('stats: ', etag)
+  const clientEtag = req.headers['if-none-match']
+  console.log('clientEtag in repos: ', clientEtag)
 
-  if (etag) { //etag exists. Let's compare it with the cached server data.
-    const isValid = isCachedDataValid('/repos', etag)
+  if (clientEtag) { //etag exists. Let's compare it with the cached server data.
+    const isValid = isCachedDataValid('/repos', clientEtag)
+    console.log('repos: isvalid: ', isValid);
 
     if (isValid) { // Use the cached data on the client side.
-      console.log('repos: isvalid: ', isValid)
+      console.log('repos: isvalid: ', isValid)      
       res.status(304).end();
       return;
     }
   }
 
-  else { // Data is not cached, fetch fresh data.
-    const cachedDataOnServer = getCachedData('/repos'); // check for the cached data on the server with the correct path.
+  // check for the cached data on the server with the correct path.
+  const cachedDataOnServer = getCachedData('/repos');
     
-    // ok. no cached no data on the client side ? Here. have the cached data from the server.
-    if (cachedDataOnServer) {
-      console.log( 'cached data on server', cachedDataOnServer);  
-      const { cachedData, cachedEtag } = cachedDataOnServer;
+  // ok. no cached no data on the client side ? Here. have the cached data from the server.
+  if (cachedDataOnServer) {
+    console.log('repos: cached data on server');  
+    const { data, etag, expirationTime } = cachedDataOnServer; // im actually not checking if this data is not expired lol.
 
-      const promises = cachedData
-        .map( async (repo) => {
-          const screenshotName = await takeScreenshot(repo.homepage, './files/screenshots'); // Check if images exist -> are there? all good.
+    const promises = data
+      .map( async (repo) => {
+        const screenshotName = await takeScreenshot(repo.homepage, './files/screenshots'); // Check if images exist -> are there? all good. // could write a more efficient funcion for this.
 
-          if (screenshotName !== repo.image_url) { // if not replace with updated image_url.
-            console.log(screenshotName); 
-            repo.image_url = screenshotName;
-          } 
-          return repo;
-        })
+        if (screenshotName !== repo.image_url) { // if not replace with updated image_url.
+          console.log(screenshotName); 
+          repo.image_url = screenshotName;
+        } 
+        return repo;
+      })
 
-      const repositories = await Promise.all(promises); // Wait for all promises to resolve before continuing
+    const repositories = await Promise.all(promises); // Wait for all promises to resolve before continuing
 
-      res.setHeader('Cache-Control', 'public, max-age=604800')
-      res.setHeader('ETag', cachedEtag);
-      res.send(repositories)
-      return;
-    } 
+    res.setHeader('Cache-Control', `public, max-age=${expirationTime / 1000}`) // expiration time in seconds.
+    res.setHeader('ETag', etag)
+    res.send(repositories)
+    return;
+  } 
 
-    console.log('repos: making a normal request')
+    console.log('repos: making fresh response')
     const username = req.query.username || "brampijper"
 
     //Create a new Octokit instance
@@ -93,16 +95,16 @@ router.get('/repos', async (req, res) => {
        })
 
       const repositories = await Promise.all(promises); // Wait for all promises to resolve before continuing
+
       const etag = generateETag(data) // Generate ETag for the data
-
-      storeData('/repos', repositories, etag) //store the url, repositories, etag to a json file
-
-      res.setHeader('Cache-Control', 'public, max-age=604800')
-      res.setHeader('ETag', etag);
+      
+      storeData('/repos', repositories, etag, maxAgeInSeconds) //store the url, repositories, etag to a json file
+      
+      res.setHeader('Cache-Control', `public, max-age=${maxAgeInSeconds}`) // always revalidates with the server
+      res.setHeader('ETag', etag)
       res.send(repositories)
       return;
     })
-  }
 })
 
 module.exports = router;

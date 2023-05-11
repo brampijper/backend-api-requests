@@ -2,53 +2,55 @@ const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch');
 
+const generateETag = require('../../utils/generateETag');
 const { 
     isCachedDataValid, 
     storeData, 
     getCachedData 
-} = require('../../utils/isCachedDataValid');
-
-const generateETag = require('../../utils/generateETag')
+} = require('../../utils/cacheUtils');
 
 // middleware that is specific to this router
 router.use('/stats', (req, res, next) => {
-  console.log('stats time: ', Date.now())
+  // console.log('stats time: ', Date.now())
   next()
 })
 
 // define user stats route for github
 router.get('/stats', (req, res) => {
+  const expirationInMinutes = 1 // set custom expire time for this route.
+  const maxAgeInSeconds = expirationInMinutes * 60;
 
-  const etag = req.headers['if-none-match']; // check for an Etag from the client
-  console.log('stats: ', etag)
- 
-  if (etag) { //etag exists. Let's compare it with the cached server data.
-    const isValid = isCachedDataValid('/stats', etag)
+  // Check if the ETag is present in the request headers
+  const clientEtag = req.headers['if-none-match']
+  console.log('clientEtag in repos: ', clientEtag)
+
+  if (clientEtag) { //etag exists. Let's compare it with the cached server data.
+    const isValid = isCachedDataValid('/stats', clientEtag)
+    console.log('repos: isvalid: ', isValid);
 
     if (isValid) { // Use the cached data on the client side.
-      console.log('stats: isvalid: ', isValid)
+      console.log('repos: isvalid: ', isValid)      
       res.status(304).end();
       return;
     }
   }
 
-  else { 
-    const cachedDataOnServer = getCachedData('/stats'); // check for the cached data on the server with the correct path.
-    
+    // check for the cached data on the server with the correct path.
+    const cachedDataOnServer = getCachedData('/stats');  
+
     // ok. no cached no data on the client side ? Here. have the cached data from the server.
     if (cachedDataOnServer) {
-      console.log( 'cached data on server', cachedDataOnServer);  
-      const { cachedData, cachedEtag } = cachedDataOnServer;
+      const { data, etag, expirationTime } = cachedDataOnServer; // im actually not checking if this data is not expired lol.
       
-      res.setHeader('Cache-Control', 'public, max-age=604800')
-      res.setHeader('ETag', cachedEtag);
-      res.send(cachedData) // integer is not valid to send with Express
+      res.setHeader('Cache-Control', `public, max-age=${expirationTime / 1000}`) // expiration time in seconds.
+      res.setHeader('ETag', etag)
+      res.send(data)
       return;
     } 
     
     // No (valid) or cached data, let's fetch new data.
-
     console.log('stats: making a normal request')
+
     const username = req.query.username
       
     const headers = {
@@ -100,15 +102,14 @@ router.get('/stats', (req, res) => {
         const etag = generateETag(totalContributions);
         
         //store the url, repositories, etag to a json file
-        storeData('/stats', totalContributions.toString(), etag)
+        storeData('/stats', totalContributions.toString(), etag, maxAgeInSeconds)
         
-        res.setHeader('Cache-Control', 'public, max-age=604800')
-        res.setHeader('ETag', etag);
+        res.setHeader('Cache-Control', `public, max-age=${maxAgeInSeconds}`) // always revalidates with the server
+        res.setHeader('ETag', etag)
         res.send(totalContributions.toString()) // integer is not valid to send with Express
         return;
       })
       .catch( err => console.error('error while fetching ', err))
-  }
 })
 
 module.exports = router;
