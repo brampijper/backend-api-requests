@@ -2,7 +2,7 @@ const { readDataFile, writeDataFile } = require('./fileUtils');
 
 let cacheData = readDataFile();
 
-async function isCachedDataValid(url, etag) {
+async function isClientDataValid(url, etag) {
     const data = cacheData[url];
 
     // No cached data exists, is expired or differnt etags. Fetch fresh data.
@@ -16,7 +16,7 @@ async function isCachedDataValid(url, etag) {
 
 function getCachedData(url) { // should I not check if the data is expired?
     const data = cacheData[url];
-  
+    
     if (!data || isDataExpired(data)) {
         console.log('no cached data on the server, or expired');
         return null;
@@ -55,7 +55,7 @@ function storeData(url, data, etag, expirationInSeconds) {
 }
 
 module.exports = {
-    isCachedDataValid,
+    isClientDataValid,
     getCachedData,
     storeData
 }
