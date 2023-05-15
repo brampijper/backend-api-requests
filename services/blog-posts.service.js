@@ -6,11 +6,9 @@ let parser = new Parser();
 
 const fetchBlogPosts = async (path) => {
     const BLOG_URL = 'https://focused-galileo-c3ee18.netlify.app/rss.xml'
-    const maxAgeInSeconds = 60;
+    const maxAgeInSeconds = 60 * 60 * 24; // cached data expiration = 1 day
 
-    try {
-        console.log('blog: making a normal request')
-        
+    try {        
         let feed = await parser.parseURL(BLOG_URL)
         
         if (!feed.items) {
@@ -25,9 +23,9 @@ const fetchBlogPosts = async (path) => {
         storeData(path, firstPost, etag, maxAgeInSeconds)
 
         return {
-            firstPost, 
+            data: firstPost, 
             etag,
-            maxAgeInSeconds: maxAgeInSeconds * 1000 // in ms
+            expiration: maxAgeInSeconds * 1000 // in ms
         }
 
     } catch(error) {
