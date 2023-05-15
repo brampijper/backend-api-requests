@@ -3,7 +3,7 @@ const { storeData } = require('../utils/cacheHelpers')
 const generateETag = require('../utils/generateETag')
 
 const fetchGithubStats = async (username, path) => {
-    const maxAgeInSeconds = 60; 
+    const maxAgeInSeconds = 60 * 60 * 12; // cached data expiration = 12 hours
 
     try {
 
@@ -57,11 +57,11 @@ const fetchGithubStats = async (username, path) => {
         const etag = generateETag(totalContributions);
             
         storeData(path, githubContributions, etag, maxAgeInSeconds) //store the url, repositories, etag to a json file
-
+        
         return { 
-            githubContributions, 
+            data: githubContributions, 
             etag,
-            maxAgeInSeconds: maxAgeInSeconds * 1000 // in ms
+            expiration: maxAgeInSeconds * 1000 // in ms
         }
 
     } catch(error) {
