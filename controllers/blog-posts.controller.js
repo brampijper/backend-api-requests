@@ -10,11 +10,12 @@ const handleGetBlogPosts = async (req, res, next) => {
         
         if (clientEtag && isDataEqual) {
             res.status(304).end() // data did not change.
+            return
         }
         
         const getCachedDataOnServer = await getCachedData(path) // Get cached data on server if exists.
 
-        const { data, etag, expiration} = // Use cached data or fetch fresh data,
+        const { data, etag, expiration } = // Use cached data or fetch fresh data,
             getCachedDataOnServer ||  (await fetchBlogPosts(path))
 
         res.setHeader('Cache-Control', `public, max-age=${expiration  / 1000}`); // expiration time in seconds.
