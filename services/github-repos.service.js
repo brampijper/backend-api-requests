@@ -12,9 +12,9 @@ const fetchGithubRepos = async (username, path) => {
         Accept: "application/vnd.github.16.28.4.raw",
     });
 
-    const mapRepoData = async ({id, homepage, name, created_at, description, topics}) => {
+    const mapRepoData = async ({id, homepage, name, created_at, description, topics, pushed_at}) => {
         
-        const image_url = await takeScreenshot(homepage, './files/screenshots') // Take and save an image on the server.
+        const image_url = await takeScreenshot(homepage, './files/screenshots', pushed_at) // Take and save an image on the server.
         
         return { // only return the properties I need.
             id,
@@ -31,7 +31,7 @@ const fetchGithubRepos = async (username, path) => {
 
       const response = await octokit.rest.repos.listForUser({username}) // Fetch the data using octokit
       const { data } = response
-
+      
       const filterAndMapData = data
         .filter( repo => repo.homepage) // Only repo's that have a homepage.
         .map(mapRepoData)
