@@ -13,9 +13,9 @@ const fetchGithubRepos = async (username, path) => {
         Accept: "application/vnd.github.16.28.4.raw",
     });
 
-    const mapRepoData = async ({id, homepage, name, created_at, pushed_at, description, topics}) => {
+    const mapRepoData = async ({id, homepage, name, created_at, description, topics, pushed_at}) => {
         
-        const image_url = await takeScreenshot(homepage, './files/screenshots') // Take and save an image on the server.
+        const image_url = await takeScreenshot(homepage, './files/screenshots', pushed_at) // Take and save an image on the server.
         
         return { // only return the properties I need.
             id,
