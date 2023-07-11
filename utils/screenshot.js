@@ -9,17 +9,35 @@ async function takeScreenshot(url, dir, lastPush) {
     + '.jpg'; // add jpg extension.
     const screenshotPath = path.join(dir, screenshotName);
 
-    const screenshotExists = fs.existsSync(screenshotPath)
+    //convert lastPushed date to ms.
+    const date = new Date(lastPush);
+    const lastPushMs = date.getTime();
+
+    const screenshotExists = await checkFileExists(screenshotPath)
+
+    //helper functions
+    async function checkFileExists(path) {
+      return fs.promises.access(path, fs.constants.F_OK)
+        .then( () => true)
+        .catch( () => false)
+    }
 
     if (screenshotExists) {
-      const birthTime = fs.stat(screenshotPath, (err, stats) => stats.birthtime)
-
-      if (birthTime < lastPush) {
+      const screenshotDate = await getBirthTime(screenshotPath)
+      
+      if (screenshotDate > lastPushMs) {
         console.log(`Screenshot for ${url} is recent, skipping...`);
         return screenshotName
       }
-    }      
-  
+    }
+
+    // helper functions (?)
+    async function getBirthTime(path) {
+      return fs.promises.stat(path)
+        .then( stats => stats.birthtimeMs)
+        .catch( err => err )
+    }
+
     const browser = await puppeteer.launch({
         headless: "new",
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
