@@ -1,41 +1,25 @@
-const fs = require('fs');
-const path = require('path');
 const puppeteer = require('puppeteer');
+const { checkFileExists, getFileBirthTime, generateScreenshotPath} = require('./fileUtils');
 
+/**
+ * Takes a screenshot of the given URL.
+ * @param {string} url - The URL to capture a screenshot of.
+ * @param {string} dir - The directory to save the screenshot.
+ * @param {string} lastPush - The timestamp representing the last push.
+ * @returns {string} - The filename of the screenshot.
+ */
 async function takeScreenshot(url, dir, lastPush) {
-  const screenshotName = url
-    .replace(/^https?:\/\//i, '') // remove "http://" or "https://"
-    .replace(/[^a-zA-Z0-9]/g, '-') // replace non-alphanumeric characters with hyphen "-"
-    + '.jpg'; // add jpg extension.
-    const screenshotPath = path.join(dir, screenshotName);
+    const {screenshotPath, screenshotName} = generateScreenshotPath(url, dir);
 
-    //convert lastPushed date to ms.
-    const date = new Date(lastPush);
-    const lastPushMs = date.getTime();
+    // Convert lastPushed date to milliseconds.
+    const lastPushMs = new Date(lastPush).getTime();
 
     const screenshotExists = await checkFileExists(screenshotPath)
+    const fileBirthTimeMs = screenshotExists ? await getFileBirthTime(screenshotPath) : null
 
-    //helper functions
-    async function checkFileExists(path) {
-      return fs.promises.access(path, fs.constants.F_OK)
-        .then( () => true)
-        .catch( () => false)
-    }
-
-    if (screenshotExists) {
-      const screenshotDate = await getBirthTime(screenshotPath)
-      
-      if (screenshotDate > lastPushMs) {
-        console.log(`Screenshot for ${url} is recent, skipping...`);
-        return screenshotName
-      }
-    }
-
-    // helper functions (?)
-    async function getBirthTime(path) {
-      return fs.promises.stat(path)
-        .then( stats => stats.birthtimeMs)
-        .catch( err => err )
+    if (screenshotExists && fileBirthTimeMs > lastPushMs) {
+      console.log(`Screenshot for ${url} is recent, skipping...`);
+      return screenshotName
     }
 
     const browser = await puppeteer.launch({

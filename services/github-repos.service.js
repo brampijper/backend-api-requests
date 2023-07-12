@@ -14,7 +14,9 @@ const fetchGithubRepos = async (username, path) => {
 
     const mapRepoData = async ({id, homepage, name, created_at, description, topics, pushed_at}) => {
         
-        const image_url = await takeScreenshot(homepage, './files/screenshots', pushed_at) // Take and save an image on the server.
+        const image_name = await takeScreenshot(homepage, './files/screenshots', pushed_at) // Take and save an image on the server.
+
+        // console.log('image_url: ', image_name)
         
         return { // only return the properties I need.
             id,
@@ -23,7 +25,7 @@ const fetchGithubRepos = async (username, path) => {
             created_at,
             description,
             topics,
-            image_url
+            image_name
         }
     }
     
