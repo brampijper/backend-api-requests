@@ -1,3 +1,6 @@
+[build]
+packages = ["google-chrome-stable"]
+
 [env]
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
 
