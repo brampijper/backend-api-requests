@@ -1,4 +1,4 @@
-const whitelist = process.env.WHITELISTED.split(", ");
+const whitelist = process.env.WHITELISTED.split(", ") ?? []
 // console.log(whitelist)
 const corsOptions = {
   exposedHeaders: 'ETag',
