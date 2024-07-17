@@ -39,6 +39,11 @@ const fetchGithubStats = async (username, path) => {
           body: JSON.stringify(body), 
           headers: headers 
         })
+
+        if (response.status === 401) {
+          throw new Error('Unauthorized: Check your API key and permissions')
+        }
+
     
         const { data } = await response.json()
       
