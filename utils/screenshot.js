@@ -23,6 +23,7 @@ async function takeScreenshot(url, dir, lastPush) {
     }
 
     const browser = await puppeteer.launch({
+        executablePath: '/usr/bin/google-chrome',
         headless: "new",
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         ignoreDefaultArgs: ['--disable-extensions']
@@ -33,7 +34,7 @@ async function takeScreenshot(url, dir, lastPush) {
 
     await page.setViewport({
         width: 1200,
-        height: 800,
+        height: 800,    
         deviceScaleFactor: 1,
       });
       
