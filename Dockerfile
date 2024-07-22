@@ -18,6 +18,11 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 # Working directory
 WORKDIR /app
 
+# Ensure necessary files exist
+RUN mkdir -p /app/files && \
+    touch /app/files/cache.json && \
+    mkdir -p /app/files/screenshots
+
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.npm to speed up subsequent builds.
 # Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
