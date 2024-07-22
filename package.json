@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": "true",
   "scripts": {
-    "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "start:dev": "sudo docker compose -f compose.dev.yaml up",
+    "start:prod": "sudo docker compose -f compose.prod.yaml up"
   },
   "engines": {
     "node": ">=18.0.0"
