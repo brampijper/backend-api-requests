@@ -8,13 +8,20 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
-  server:
+  app:
+    image: my-app:latest
     build:
       context: .
-    environment:
-      NODE_ENV: production
+      dockerfile: Dockerfile
     ports:
-      - 3000:3000
+      - "3000:3000"
+    volumes:
+      - /home/bram/dev/2024/backend-api-requests/files:/app/files
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - WHITELISTED=${WHITELISTED}
+    command: node ./bin/www
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
