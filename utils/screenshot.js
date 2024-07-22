@@ -23,9 +23,16 @@ async function takeScreenshot(url, dir, lastPush) {
     }
 
     const browser = await puppeteer.launch({
-        executablePath: '/usr/bin/google-chrome',
+        executablePath: '/usr/bin/chromium-browser',
         headless: "new",
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+          '--disable-software-rasterizer',
+          '--disable-namespace-sandbox'
+        ],
         ignoreDefaultArgs: ['--disable-extensions']
     });
 
