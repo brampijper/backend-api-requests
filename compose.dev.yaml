@@ -1,0 +1,25 @@
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Docker Compose reference guide at
+# https://docs.docker.com/go/compose-spec-reference/
+
+# Here the instructions define your application as a service called "server".
+# This service is built from the Dockerfile in the current directory.
+# You can add other services your application may depend on here, such as a
+# database or a cache. For examples, see the Awesome Compose repository:
+# https://github.com/docker/awesome-compose
+
+services:
+  app:
+    image: my-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - /home/bram/dev/2024/backend-api-requests/files:/app/files
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - WHITELISTED=${WHITELISTED}
+    command: node ./bin/www
