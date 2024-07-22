@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const CACHE_FILE_PATH = path.join(__dirname, '../files/cache.json');
+const CACHE_FILE_PATH = path.join(__dirname, '../files/cache/index.json');
 
 // Read data from file
 function readDataFile() {
