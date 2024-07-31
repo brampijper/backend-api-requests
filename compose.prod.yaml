@@ -12,4 +12,4 @@ services:
       - WHITELISTED=${WHITELISTED}
     command: node ./bin/www
     volumes:
-      - .files:/app/files # Volume is differeint in the production env. 
+      - /data/coolify/applications/og8gwww/files:/app/files # Volume is differeint in the production env. 
