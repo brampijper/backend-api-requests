@@ -17,9 +17,10 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /home/bram/dev/2024/backend-api-requests/files:/app/files
+      - /Users/brampijper/dev/backend-api-requests/files:/app/files
     environment:
       - NODE_ENV=development
       - PORT=3000
       - WHITELISTED=${WHITELISTED}
+      - GITHUB_API_KEY=${GITHUB_API_KEY}
     command: node ./bin/www
