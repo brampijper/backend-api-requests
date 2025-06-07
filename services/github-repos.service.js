@@ -1,11 +1,14 @@
-const { Octokit } = await import("@octokit/rest");
 const { storeData } = require('../utils/cacheHelpers');
 const generateETag = require('../utils/generateETag');
 const takeScreenshot = require('../utils/screenshot');
 const sortData = require('../utils/sortData');
 
 const fetchGithubRepos = async (username, path) => {
-    const maxAgeInSeconds = 60 * 60 * 24; // cached data expiration = 1 day 
+  
+  // Move dynamic import inside the async function
+  const { Octokit } = await import("@octokit/rest");
+  
+  const maxAgeInSeconds = 60 * 60 * 24; // cached data expiration = 1 day 
 
     const octokit = new Octokit({ // Create a new Octokit instance.
         auth: process.env.GITHUB_API_KEY,
