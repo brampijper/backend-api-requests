@@ -7,7 +7,7 @@ FROM zenika/alpine-chrome:with-node
 USER root
 
 # Create a user and group named 'chrome' if it doesn't exist, otherwise just add the user
-RUN addgroup -S chrome || true && adduser -S -G chrome chrome || true
+RUN addgroup -g 0 chrome && adduser -S -u 0 -G chrome chrome
 
 # Use production node environment by default.
 ENV NODE_ENV production
@@ -19,9 +19,10 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 WORKDIR /app
 
 # Ensure necessary files exist
-RUN mkdir -p /app/files && \
+RUN mkdir -p /app/files/cache && \
+    mkdir -p /app/files/screenshots && \
     touch /app/files/cache.json && \
-    mkdir -p /app/files/screenshots
+    chown -R chrome:chrome /app/files
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.npm to speed up subsequent builds.
@@ -37,9 +38,6 @@ COPY . .
 
 # Copy .env file into the container
 COPY .env .env
-
-# Change ownership to a non-root user for extra safety. 
-RUN chown -R chrome:chrome /app
 
 # Set the user to 'chrome' for running the application
 USER chrome
