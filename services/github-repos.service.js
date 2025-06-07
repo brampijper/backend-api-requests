@@ -29,7 +29,7 @@ const fetchGithubRepos = async (username, path) => {
           pushed_at: repo.pushed_at,
           description: repo.description,
           topics: repo.topics,
-          image_name: await takeScreenshot(repo.homepage, './files/screenshots', repo.pushed_at)
+          image_name: await takeScreenshot(repo.homepage, '/app/files/screenshots', repo.pushed_at)
         };
       } catch (screenshotError) {
         console.error(`Screenshot failed for ${repo.name}:`, screenshotError);

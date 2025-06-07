@@ -23,8 +23,14 @@ WORKDIR /app
 RUN mkdir -p /app/files/cache && \
     mkdir -p /app/files/screenshots && \
     touch /app/files/cache.json && \
-    chmod -R 777 /app/files/screenshots && \
-    chown -R chrome:chrome /app/files
+    chown -R chrome:chrome /app/files && \
+    chmod -R 755 /app/files
+
+# Verify directory structure post-copy
+COPY . .
+RUN chown -R chrome:chrome /app/files && \
+    [ -d "/app/files/cache" ] && echo "Cache exists" || echo "Cache missing" && \
+    [ -d "/app/files/screenshots" ] && echo "Screenshots exist" || echo "Screenshots missing"
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.npm to speed up subsequent builds.
