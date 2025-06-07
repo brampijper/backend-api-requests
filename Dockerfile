@@ -7,8 +7,9 @@ FROM zenika/alpine-chrome:with-node
 USER root
 
 # Create a user and group named 'chrome' if it doesn't exist, otherwise just add the user
-RUN addgroup -g 0 chrome && adduser -S -u 0 -G chrome chrome
-
+RUN addgroup -g 0 chrome || true && \
+    adduser -S -u 0 -G chrome chrome || true
+    
 # Use production node environment by default.
 ENV NODE_ENV production
 
