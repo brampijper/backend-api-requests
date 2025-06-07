@@ -1,4 +1,4 @@
-const { Octokit } = require("@octokit/rest");
+const { Octokit } = await import("@octokit/rest");
 const { storeData } = require('../utils/cacheHelpers');
 const generateETag = require('../utils/generateETag');
 const takeScreenshot = require('../utils/screenshot');
