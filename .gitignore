@@ -2,3 +2,4 @@ node_modules
 .env
 *.jpg
 /files/cache/index.json
+**/.DS_Store
