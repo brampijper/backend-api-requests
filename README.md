@@ -15,6 +15,10 @@ cd backend-api-requests
 
 Before running this project, you will need to have [Node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/) installed on your machine.
 
+### ENV File
+
+This project uses environment variables. Check the example.env file in the root of the repo to create your own variables.
+
 ### Installing
 
 To install the dependencies, run the following command:
