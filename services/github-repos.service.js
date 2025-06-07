@@ -4,62 +4,64 @@ const takeScreenshot = require('../utils/screenshot');
 const sortData = require('../utils/sortData');
 
 const fetchGithubRepos = async (username, path) => {
-  
-  // Move dynamic import inside the async function
-  const { Octokit } = await import("@octokit/rest");
-  
-  const maxAgeInSeconds = 60 * 60 * 24; // cached data expiration = 1 day 
-
-    const octokit = new Octokit({ // Create a new Octokit instance.
-        auth: process.env.GITHUB_API_KEY,
-        userAgent: username,
-        Accept: "application/vnd.github.16.28.4.raw",
+  try {
+    const { Octokit } = await import("@octokit/rest");
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_API_KEY,
+      userAgent: username,
+      Accept: "application/vnd.github.16.28.4.raw",
     });
 
-    const mapRepoData = async ({id, homepage, name, created_at, description, topics, pushed_at}) => {
-        
-        const image_name = await takeScreenshot(homepage, './files/screenshots', pushed_at) // Take and save an image on the server.
-
-        // console.log('image_url: ', image_name)
-        
-        return { // only return the properties I need.
-            id,
-            homepage,
-            name,
-            created_at,
-            pushed_at,
-            description,
-            topics,
-            image_name
-        }
+    // 1. Add response validation
+    const response = await octokit.rest.repos.listForUser({ username });
+    if (!response?.data || !Array.isArray(response.data)) {
+      throw new Error('Invalid GitHub API response structure');
     }
-    
-    try {
-      const response = await octokit.rest.repos.listForUser({username}) // Fetch the data using octokit
-      const { data } = response
 
-      const filterSortAndMapData = data
-        .filter( repo => repo.homepage) // Only repo's that have a homepage.
-        .sort( (a, b) => sortData(a.pushed_at, b.pushed_at)) // sort by last updated.
-        .map(mapRepoData);
-      
-      const repositories = await Promise.all(filterSortAndMapData) // wait until all the screenshots has been taken.
-
-      const etag = generateETag(data) // Generate ETag for the data
-
-      storeData(path, repositories, etag, maxAgeInSeconds) //store the url, repositories, etag to a json file
-
-      return { 
-        data: repositories, 
-        etag,
-        expiration: maxAgeInSeconds * 1000 // in ms
+    // 2. Safe data processing with error handling
+    const processRepo = async (repo) => {
+      try {
+        return {
+          id: repo.id,
+          homepage: repo.homepage,
+          name: repo.name,
+          created_at: repo.created_at,
+          pushed_at: repo.pushed_at,
+          description: repo.description,
+          topics: repo.topics,
+          image_name: await takeScreenshot(repo.homepage, './files/screenshots', repo.pushed_at)
+        };
+      } catch (screenshotError) {
+        console.error(`Screenshot failed for ${repo.name}:`, screenshotError);
+        return { ...repo, image_name: null };
       }
+    };
 
-    }  catch(error) {
-        console.error('error while fetching', error);
-    }
-}
+    // 3. Parallel processing with safety
+    const reposWithHomepages = response.data.filter(repo => repo.homepage);
+    const sortedRepos = reposWithHomepages.sort((a, b) => sortData(a.pushed_at, b.pushed_at));
+    const repositories = await Promise.all(sortedRepos.map(processRepo));
 
-module.exports = {
-    fetchGithubRepos
-}
+    // 4. Validate before storing
+    const etag = generateETag(repositories);
+    storeData(path, repositories, etag, 60 * 60 * 24);
+
+    return {
+      data: repositories,
+      etag,
+      expiration: 86400000 // 24h in ms
+    };
+
+  } catch (error) {
+    console.error('Critical error:', error);
+    // 5. Return structured error for frontend
+    return {
+      error: error.message,
+      data: [],
+      etag: null,
+      expiration: 0
+    };
+  }
+};
+
+module.exports = { fetchGithubRepos };
