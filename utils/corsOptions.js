@@ -1,6 +1,8 @@
-const whitelist = process.env.WHITELISTED?.split(", ") ?? []
+const whitelist = (process.env.WHITELISTED || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean)
 
-// console.log(whitelist)
 const corsOptions = {
   exposedHeaders: 'ETag',
   origin: function (origin, callback) {
