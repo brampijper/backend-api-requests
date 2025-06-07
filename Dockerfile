@@ -9,7 +9,7 @@ USER root
 # Create a user and group named 'chrome' if it doesn't exist, otherwise just add the user
 RUN addgroup -g 0 chrome || true && \
     adduser -S -u 0 -G chrome chrome || true
-    
+
 # Use production node environment by default.
 ENV NODE_ENV production
 
@@ -23,6 +23,7 @@ WORKDIR /app
 RUN mkdir -p /app/files/cache && \
     mkdir -p /app/files/screenshots && \
     touch /app/files/cache.json && \
+    chmod -R 777 /app/files/screenshots && \
     chown -R chrome:chrome /app/files
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
