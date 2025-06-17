@@ -1,35 +1,39 @@
+require('dotenv').config();
 const { storeData } = require('../utils/cacheHelpers')
 const generateETag = require('../utils/generateETag')
+const Parser = require('rss-parser');
+const parser = new Parser();
 
-let Parser = require('rss-parser');
-let parser = new Parser();
+const BLOG_URL = process.env.BLOG_URL
+const CACHE_MAX_AGE_SECONDS = 60 * 60 * 24; // 1 day
+
+/**
+ * Fetches the latest blog post from the RSS feed, caches it, and returns metadata.
+ * @param {string} cacheKey - Key for storing the cached data.
+ * @returns {Promise<{data: object|null, etag: string|null, expiration: number, error?: Error}>}
+ */
 
 const fetchBlogPosts = async (path) => {
-    const BLOG_URL = 'https://focused-galileo-c3ee18.netlify.app/rss.xml'
-    const maxAgeInSeconds = 60 * 60 * 24; // cached data expiration = 1 day
-
     try {        
-        let feed = await parser.parseURL(BLOG_URL)
+        const rssFeed = await parser.parseURL(BLOG_URL);
         
-        if (!feed.items) {
-            const message = `An error has occured: ${feed}`
-            console.error(message)
+        if (!rssFeed.items || rssFeed.items.length === 0) {
+            throw new Error(`No blog posts found in RSS feed: ${BLOG_URL}`);
         }
-    
-        const [firstPost] = feed.items;
-    
-        const etag = generateETag(firstPost)
+
+        const latestPost = rssFeed.items[0]    
+        const etag = generateETag(latestPost)
         
-        storeData(path, firstPost, etag, maxAgeInSeconds)
+        storeData(path, latestPost, etag, CACHE_MAX_AGE_SECONDS)
 
         return {
-            data: firstPost, 
+            data: latestPost, 
             etag,
-            expiration: maxAgeInSeconds * 1000 // in ms
-        }
-
+            expiration: CACHE_MAX_AGE_SECONDS * 1000 // in ms
+        };
     } catch(error) {
-        console.error('error while fetching', error);
+        console.error('error while fetching blog post:', error);
+        return { data: null, etag: null, expiration: 0, error }; 
     }
 }
 

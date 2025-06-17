@@ -10,6 +10,7 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - WHITELISTED=${WHITELISTED}
+      - BLOG_URL=${BLOG_URL}
     command: node ./bin/www
     volumes:
       - /data/coolify/applications/og8gwww/files:/app/files:Z # Volume is differeint in the production env. 

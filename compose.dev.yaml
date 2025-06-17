@@ -23,4 +23,5 @@ services:
       - PORT=3000
       - WHITELISTED=${WHITELISTED}
       - GITHUB_API_KEY=${GITHUB_API_KEY}
+      - BLOG_URL=${BLOG_URL}
     command: node ./bin/www
